@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Greyhound Sports Store</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+    body{background:#f4f4f4;color:#111}
+    .navbar{background:#111;color:#fff;padding:12px 5vw;display:flex;justify-content:space-between}
+    .filters,.subfilters{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+    .filter-btn,.subfilter-btn{padding:4px 10px;font-size:.8rem;border-radius:20px;border:1px solid #bbb;cursor:pointer;background:#fff}
+    .filter-btn.active,.subfilter-btn.active{background:#111;color:#fff;border-color:#111}
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:12px}
+    .product-card{background:#fff;padding:8px;border-radius:6px;border:1px solid #ddd}
+    .category-tag{background:#eee;padding:2px 6px;border-radius:10px;font-size:.7rem}
+    .price{font-weight:700}
+    .cart-panel{background:#fff;padding:10px;border:1px solid #ddd;border-radius:6px}
+    .btn{background:#111;color:#fff;border:none;padding:6px;border-radius:20px;cursor:pointer;width:100%;margin-top:6px}
+  </style>
+</head>
+<body>
+
+<header class="navbar">
+  <div>Greyhound Sports Store</div>
+  <div>Cart: <span id="cart-count">0</span></div>
+</header>
+
+<main style="padding:20px 5vw;display:grid;gap:20px;grid-template-columns:2fr 1fr">
+<section>
+  <h2>Products</h2>
+
+  <div class="filters">
+    <button class="filter-btn active" data-cat="All">All</button>
+    <button class="filter-btn" data-cat="Clothes">Clothes</button>
+    <button class="filter-btn" data-cat="Cricket">Cricket</button>
+    <button class="filter-btn" data-cat="Football">Football</button>
+    <button class="filter-btn" data-cat="Badminton">Badminton</button>
+    <button class="filter-btn" data-cat="Indoor Games">Indoor Games</button>
+    <button class="filter-btn" data-cat="Outdoor Games">Outdoor Games</button>
+  </div>
+
+  <div class="subfilters" id="cricket-sub" style="display:none">
+    <button class="subfilter-btn active" data-sub="All">All</button>
+    <button class="subfilter-btn" data-sub="Bat">Bat</button>
+    <button class="subfilter-btn" data-sub="Ball">Ball</button>
+    <button class="subfilter-btn" data-sub="Helmet">Helmet</button>
+    <button class="subfilter-btn" data-sub="Wicket">Wicket</button>
+  </div>
+
+  <div id="products" class="products-grid"></div>
+</section>
+
+<section class="cart-panel">
+  <h3>Cart Items</h3>
+  <div id="cart"></div>
+  <div>Total: ₹<span id="total">0</span></div>
+  <button class="btn" id="place-order">Place Order</button>
+</section>
+</main>
+
+<script>
+const products = {
+  "Badminton":[
+    {id:1,name:"KONEX PRO(311) - Plastic",price:540,desc:"Unit | Shuttle"},
+    {id:2,name:"OSCAR - Feather",price:370,desc:"Unit | Shuttle"},
+    {id:3,name:"SENU - Feather",price:250,desc:"Unit | Shuttle"},
+    {id:4,name:"Smash 500 - Plastic",price:195,desc:"Unit | Shuttle"},
+    {id:5,name:"Dexter 'D'",price:650,desc:"Unit | Badminton"},
+    {id:6,name:"VAVIS 2000",price:600,desc:"Unit | Badminton"},
+    {id:7,name:"RMB 777",price:700,desc:"Unit | Badminton"},
+    {id:8,name:"RMB 3000",price:1350,desc:"Unit | Badminton"},
+    {id:9,name:"RMB 4500",price:2000,desc:"Unit | Badminton"},
+    {id:10,name:"TOLEDOS *900*",price:590,desc:"Unit | Shuttle"},
+    {id:11,name:"TOLEDOS 305",price:290,desc:"Unit | Shuttle"},
+    {id:12,name:"TOLEDOS 3330",price:390,desc:"Unit | Shuttle"},
+    {id:13,name:"Wintech",price:550,desc:"Unit | Badminton"},
+    {id:14,name:"Greyhound 2000",price:350,desc:"Unit | Badminton"},
+    {id:15,name:"Greyhound 5000",price:530,desc:"Unit | Badminton"},
+    {id:16,name:"Greyhound Classic",price:630,desc:"Unit | Badminton"},
+    {id:17,name:"Toldos Ultra 205",price:290,desc:"Unit | Shuttle"},
+    {id:18,name:"Feather Shuttle RMB",price:400,desc:"Unit | Shuttle"},
+    {id:19,name:"Grip Kaushal",price:40,desc:"Unit | Grip"},
+    {id:20,name:"Grip YONEX",price:50,desc:"Unit | Grip"},
+    {id:21,name:"Grip 3PC",price:90,desc:"Unit | Grip"},
+    {id:22,name:"Grip VICTOR",price:45,desc:"Unit | Grip"}
+  ],
+  "Cricket":[
+    {id:23,name:"Tennis Ball",price:70,desc:"Unit | Ball",sub:"Ball"},
+    {id:24,name:"HEAD Tennis Ball",price:165,desc:"Unit | Ball",sub:"Ball"},
+    {id:25,name:"Cosco Cricket Tennis",price:115,desc:"Unit | Ball",sub:"Ball"},
+    {id:26,name:"Leather Ball",price:350,desc:"Unit | Ball",sub:"Ball"},
+    {id:64,name:"Tennis Ball Box",price:290,desc:"Unit | Ball",sub:"Ball"},
+    {id:27,name:"Cricket Bat SS",price:1599,desc:"Unit | Bat",sub:"Bat"},
+    {id:28,name:"Batting Gloves",price:699,desc:"Unit | Gloves",sub:"Bat"},
+    {id:29,name:"Arm Guard",price:199,desc:"Unit | Guard",sub:"Bat"},
+    {id:31,name:"Pads",price:799,desc:"Unit | Pads",sub:"Bat"},
+    {id:30,name:"Helmet",price:999,desc:"Unit | Helmet",sub:"Helmet"},
+    {id:32,name:"Stump Set",price:299,desc:"Unit | Stumps",sub:"Wicket"},
+    {id:54,name:"Cricket Net",price:450,desc:"Unit | Net",sub:"Wicket"},
+    {id:65,name:"Cricket Bails",price:120,desc:"Unit | Bails",sub:"Wicket"}
+  ],
+  "Football":[
+    {id:33,name:"Football (Red)",price:399,desc:"Unit | Football"},
+    {id:34,name:"Football Studs",price:1299,desc:"Unit | Boots"},
+    {id:35,name:"Football Pump",price:149,desc:"Unit | Pump"}
+  ],
+  "Clothes":[
+    {id:36,name:"Underwear Pack",price:120,desc:"Unit | Clothing"},
+    {id:37,name:"Sports Shoes (Kids)",price:450,desc:"Unit | Shoes"},
+    {id:38,name:"Sports Shoes (Men)",price:650,desc:"Unit | Shoes"},
+    {id:39,name:"Sports Shoes (Women)",price:650,desc:"Unit | Shoes"}
+  ],
+  "Indoor Games":[
+    {id:40,name:"Chess Board",price:199,desc:"Unit | Chess"},
+    {id:41,name:"Carrom Board",price:1599,desc:"Unit | Carrom"},
+    {id:42,name:"Carrom Coins",price:120,desc:"Unit | Coins"},
+    {id:43,name:"Table Tennis Bat",price:299,desc:"Unit | TT Bat"},
+    {id:44,name:"Table Tennis Ball",price:80,desc:"Unit | TT Ball"}
+  ],
+  "Outdoor Games":[
+    {id:45,name:"Whistle",price:50,desc:"Unit | Whistle"},
+    {id:46,name:"Volleyball",price:499,desc:"Unit | Volleyball"},
+    {id:47,name:"Skipping Rope",price:120,desc:"Unit | Rope"},
+    {id:48,name:"Frisbee",price:99,desc:"Unit | Frisbee"},
+    {id:49,name:"Hockey Ball",price:180,desc:"Unit | Ball"},
+    {id:50,name:"Tennis Racquet",price:550,desc:"Unit | Tennis"},
+    {id:51,name:"Swimming Goggles",price:299,desc:"Unit | Goggles"},
+    {id:52,name:"Dumbbells (Pair)",price:699,desc:"Unit | Gym"},
+    {id:53,name:"Football Net",price:350,desc:"Unit | Net"},
+    {id:55,name:"Bat Grip",price:50,desc:"Unit | Grip"},
+    {id:56,name:"Hockey Stick",price:650,desc:"Unit | Stick"},
+    {id:57,name:"Shot Put",price:699,desc:"Unit | Shot Put"},
+    {id:58,name:"Basketball",price:599,desc:"Unit | Basketball"},
+    {id:59,name:"Badminton Net",price:290,desc:"Unit | Net"},
+    {id:60,name:"Hand Gripper",price:150,desc:"Unit | Gripper"},
+    {id:61,name:"Scooter Board",price:499,desc:"Unit | Scooter"},
+    {id:62,name:"Hula Hoop",price:249,desc:"Unit | Hoop"},
+    {id:63,name:"Foot Pump",price:150,desc:"Unit | Pump"},
+    {id:66,name:"Duffle Bag",price:675,desc:"Unit | Bag"},
+    {id:67,name:"Fitness Jump Rope",price:199,desc:"Unit | Rope"},
+    {id:68,name:"Dart Board",price:450,desc:"Unit | Dart"},
+    {id:69,name:"Running Cone Set",price:249,desc:"Unit | Cones"}
+  ]
+};
+
+let cart=[],cat="All",sub="All";
+
+function showProducts(){
+  let list = cat==="All" ? Object.values(products).flat() : products[cat];
+  if(cat==="Cricket" && sub!=="All") list=list.filter(p=>p.sub===sub);
+  const box=document.getElementById("products");
+  box.innerHTML="";
+  list.forEach(p=>{
+    box.innerHTML+=`
+    <div class="product-card">
+      <span class="category-tag">${cat==="All"?getCat(p.id):cat+(p.sub?` - ${p.sub}`:"")}</span>
+      <h4>${p.name}</h4>
+      <p>${p.desc}</p>
+      <p class="price">₹${p.price}</p>
+      <button class="btn" onclick="add(${p.id})">Add to Cart</button>
+    </div>`;
+  });
+}
+
+function getCat(id){
+  for(const x in products) if(products[x].find(p=>p.id===id)) return x;
+}
+
+function add(id){
+  const item = cart.find(c=>c.id===id);
+  item ? item.qty++ : cart.push({id,qty:1});
+  showCart();
+}
+
+function showCart(){
+  const box=document.getElementById("cart"),all=Object.values(products).flat();
+  box.innerHTML=""; let total=0,q=0;
+  cart.forEach(c=>{
+    const p=all.find(i=>i.id===c.id);
+    total+=p.price*c.qty; q+=c.qty;
+    box.innerHTML+=`${p.name} x ${c.qty}<br>`;
+  });
+  document.getElementById("total").innerText=total;
+  document.getElementById("cart-count").innerText=q;
+}
+
+document.querySelectorAll(".filter-btn").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".filter-btn").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  cat=b.dataset.cat; sub="All";
+  document.getElementById("cricket-sub").style.display = cat==="Cricket"?"flex":"none";
+  showProducts();
+});
+
+document.querySelectorAll(".subfilter-btn").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".subfilter-btn").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active"); sub=b.dataset.sub; showProducts();
+});
+
+showProducts();
+</script>
+</body>
+</html>
